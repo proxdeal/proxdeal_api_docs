@@ -21,3 +21,30 @@
 .card-group + .card-group {
   margin-top: 1rem !important;
 }
+
+/* Shrink the card icons (rendered as masked svg.size-6, 24px) by 30%. */
+.card svg.size-6 {
+  width: 1.05rem !important;
+  height: 1.05rem !important;
+}
+
+/* Less-rounded Dashboard button: its filled background is an inset span. */
+header a span[class*="rounded"] {
+  border-radius: 0.2rem !important;
+}
+
+/* Less-rounded sidebar active/hover overlay (links default to rounded-xl). */
+.sidebar-group a {
+  border-radius: 0.2rem !important;
+}
+
+/* Align the navbar right controls (Dashboard + theme toggle) with the left
+   edge of the "On this page" rail, which only appears at xl (>=1280px).
+   The rail is a fixed 304px column + 32px gutter inside the centered
+   max-width container, and the controls sit 48px (px-12) inside that same
+   container's right edge, so a constant 119px left shift lines them up. */
+@media (min-width: 1280px) {
+  header .ml-auto.justify-end.space-x-4 {
+    margin-right: 119px !important;
+  }
+}
