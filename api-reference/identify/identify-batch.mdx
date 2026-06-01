@@ -1,162 +1,20 @@
 ---
 title: "Identify Batch"
 description: "Submit a CSV or Excel file for bulk company identification."
+openapi: "POST /v0/identify/batch"
 ---
 
-```
-POST https://api.proxdeal.com/v0/identify/batch
-GET  https://api.proxdeal.com/v0/identify/batch/{job_id}
-```
-
-Accepts a CSV or Excel file (up to 1,000 rows, 10 MB). Maps columns to ProxDeal fields using one LLM call, then identifies each row's company in a background job. Returns a `job_id` immediately — poll the status endpoint until the job completes.
-
-Optionally supply a `column_mapping` to skip the automatic LLM column-mapping step.
-
-## Submit a batch job
-
-### Request
-
-Send the file as `multipart/form-data`.
-
-<ParamField body="file" type="file" required>
-  CSV or Excel file (`.csv`, `.xlsx`). Maximum 1,000 rows and 10 MB. Must contain at least one column that can be used to identify companies (name, register number, website, etc.).
-</ParamField>
-
-<ParamField body="column_mapping" type="string">
-  Optional JSON string mapping your column names to ProxDeal fields. If omitted, the LLM automatically infers the mapping.
-
-  Example: `'{"Firmenname": "company_name", "Stadt": "city", "HRB": "register_number"}'`
-</ParamField>
-
-### Example
-
-<CodeGroup>
-```bash cURL
-curl -X POST https://api.proxdeal.com/v0/identify/batch \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "file=@companies.csv"
-```
-```python Python
-import httpx
-
-with open("companies.csv", "rb") as f:
-    resp = httpx.post(
-        "https://api.proxdeal.com/v0/identify/batch",
-        files={"file": ("companies.csv", f, "text/csv")},
-        headers={"Authorization": "Bearer YOUR_API_KEY"},
-        timeout=60.0,
-    )
-
-job_id = resp.json()["job_id"]
-```
-```typescript TypeScript
-const form = new FormData();
-form.append("file", fileBlob, "companies.csv");
-
-const resp = await fetch("https://api.proxdeal.com/v0/identify/batch", {
-  method: "POST",
-  headers: { Authorization: "Bearer YOUR_API_KEY" },
-  body: form,
-});
-const { job_id } = await resp.json();
-```
-</CodeGroup>
-
-### Response
-
-```json
-{
-  "status": "success",
-  "job_id": "job_abc123def456",
-  "message": "Batch job submitted successfully",
-  "request_id": "req_abc123def456"
-}
-```
-
----
+Accepts a CSV or Excel file (up to 1,000 rows, 10 MB) as `multipart/form-data`. Maps columns to ProxDeal fields using one LLM call, then identifies each row's company in a background job. The submit call returns a `job_id` immediately — poll the status endpoint until the job completes. Optionally supply a `column_mapping` JSON string to skip the automatic column-mapping step.
 
 ## Poll for results
+
+The submit endpoint above is asynchronous. Poll the companion endpoint with the returned `job_id` until it finishes:
 
 ```
 GET https://api.proxdeal.com/v0/identify/batch/{job_id}
 ```
 
-### Path parameters
-
-<ParamField path="job_id" type="string" required>
-  The job ID returned from the submit endpoint.
-</ParamField>
-
-### Example
-
-<CodeGroup>
-```bash cURL
-curl https://api.proxdeal.com/v0/identify/batch/job_abc123def456 \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-```python Python
-import httpx, time
-
-while True:
-    resp = httpx.get(
-        f"https://api.proxdeal.com/v0/identify/batch/{job_id}",
-        headers={"Authorization": "Bearer YOUR_API_KEY"},
-    )
-    data = resp.json()
-    if data["status"] in ("completed", "failed"):
-        break
-    time.sleep(5)
-
-results = data.get("results", [])
-```
-</CodeGroup>
-
-### Response
-
-```json
-{
-  "status": "completed",
-  "job_id": "job_abc123def456",
-  "results": [
-    {
-      "row_index": 0,
-      "input_text": "Siemens AG München",
-      "sdac_id": "de-4qcggwpkw4dd41qa",
-      "company_legal_name": "Siemens Aktiengesellschaft",
-      "match_score": 0.97,
-      "match_status": "matched"
-    },
-    {
-      "row_index": 1,
-      "input_text": "Unknown Company XYZ",
-      "sdac_id": null,
-      "company_legal_name": null,
-      "match_score": null,
-      "match_status": "unmatched"
-    }
-  ],
-  "request_id": "req_abc123def456"
-}
-```
-
-<ResponseField name="status" type="string">
-  Job status: `pending`, `running`, `completed`, or `failed`.
-</ResponseField>
-
-<ResponseField name="results" type="object[]">
-  Available when `status="completed"`. One object per input row.
-
-  <Expandable title="Result row">
-    <ResponseField name="row_index" type="integer">Zero-based row index from the input file.</ResponseField>
-    <ResponseField name="input_text" type="string">The input text used for identification.</ResponseField>
-    <ResponseField name="sdac_id" type="string | null">Resolved ProxDeal `company_id`, or `null` if unmatched.</ResponseField>
-    <ResponseField name="company_legal_name" type="string | null">Legal name of the matched company.</ResponseField>
-    <ResponseField name="match_score" type="number | null">Confidence score (0.0–1.0).</ResponseField>
-    <ResponseField name="match_status" type="string">`"matched"` or `"unmatched"`.</ResponseField>
-  </Expandable>
-</ResponseField>
-
-## Polling strategy
+The response `status` is one of `pending`, `running`, `completed`, or `failed`. When `completed`, a `results` array holds one object per input row — each with `row_index`, `input_text`, `sdac_id` (resolved `company_id` or `null`), `company_legal_name`, `match_score` (0.0–1.0), and `match_status` (`"matched"` / `"unmatched"`).
 
 <Tip>
   Poll every 5–10 seconds. Most jobs with under 200 rows complete in under 2 minutes. For 1,000-row files, allow up to 10 minutes.

@@ -1,115 +1,16 @@
 ---
 title: "Lookup by Name"
 description: "Autocomplete-style company lookup by legal name."
+openapi: "GET /v0/lookup/company"
 ---
 
-```
-GET https://api.proxdeal.com/v0/lookup/company
-```
-
-Returns companies whose normalised legal name contains the `query` string. Input is lowercased and stripped of whitespace and punctuation before matching, enabling partial and autocomplete-style lookups. For example, `"holzstudio sahm"` matches `"Holzstudio Sahm GmbH & Co. KG"`.
+Returns companies whose normalised legal name contains the `query` string, enabling partial and autocomplete-style lookups. For example, `"holzstudio sahm"` matches `"Holzstudio Sahm GmbH & Co. KG"`.
 
 Use this endpoint to resolve a company name to a `company_id`, then fetch the full profile with [Get Company](/api-reference/company/get-company).
 
-## Query parameters
-
-<ParamField query="query" type="string" required>
-  Company name to search. Minimum 2 characters. Partial matches are supported — the input is normalised before matching (lowercased, punctuation stripped).
-</ParamField>
-
-<ParamField query="country_iso_code" type="string">
-  Restrict results to a single country: `AT`, `DE`, or `CH`.
-</ParamField>
-
-<ParamField query="limit" type="integer" default="20">
-  Maximum results to return. Range: 1–50.
-</ParamField>
-
-<ParamField query="offset" type="integer" default="0">
-  Number of results to skip for pagination.
-</ParamField>
-
-## Example
-
-<CodeGroup>
-```bash cURL
-curl "https://api.proxdeal.com/v0/lookup/company?query=Holzstudio+Sahm&country_iso_code=DE" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-```python Python
-import httpx
-
-resp = httpx.get(
-    "https://api.proxdeal.com/v0/lookup/company",
-    params={"query": "Holzstudio Sahm", "country_iso_code": "DE"},
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-)
-results = resp.json()["data"]
-company_id = results[0]["company_id"]
-```
-```typescript TypeScript
-const params = new URLSearchParams({ query: "Holzstudio Sahm", country_iso_code: "DE" });
-const resp = await fetch(
-  `https://api.proxdeal.com/v0/lookup/company?${params}`,
-  { headers: { Authorization: "Bearer YOUR_API_KEY" } }
-);
-const { data, total_count } = await resp.json();
-```
-</CodeGroup>
-
-## Response
-
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "company_id": "de-4qcggwpkw4dd41qa",
-      "company_legal_name": "Holzstudio Sahm GmbH & Co. KG",
-      "company_legal_form": "GmbH & Co. KG",
-      "register_number": "HRA 12345",
-      "district_court": "Amtsgericht München",
-      "register_type": "HRA",
-      "company_active": true,
-      "country_iso_code": "DE"
-    }
-  ],
-  "total_count": 1,
-  "limit": 20,
-  "offset": 0,
-  "message": "Found 1 matching company for 'Holzstudio Sahm'",
-  "timestamp": "2026-02-18T10:30:00Z",
-  "request_id": "req_abc123def456"
-}
-```
-
-## Response fields
-
-<ResponseField name="data" type="object[]">
-  List of matching companies.
-
-  <Expandable title="Company item">
-    <ResponseField name="company_id" type="string">Unique ProxDeal identifier — use with `GET /v0/company/{company_id}`.</ResponseField>
-    <ResponseField name="company_legal_name" type="string">Official registered legal name.</ResponseField>
-    <ResponseField name="company_legal_form" type="string | null">Legal form (e.g. `GmbH`, `AG`, `KG`).</ResponseField>
-    <ResponseField name="register_number" type="string | null">Commercial register number.</ResponseField>
-    <ResponseField name="district_court" type="string | null">Responsible district court.</ResponseField>
-    <ResponseField name="register_type" type="string | null">Register type: `HRB`, `HRA`, or `FN`.</ResponseField>
-    <ResponseField name="company_active" type="boolean | null">Whether the company is currently active.</ResponseField>
-    <ResponseField name="country_iso_code" type="string | null">ISO country code: `DE`, `AT`, or `CH`.</ResponseField>
-  </Expandable>
-</ResponseField>
-
-<ResponseField name="total_count" type="integer">
-  Total number of matching companies across all pages.
-</ResponseField>
-
-<ResponseField name="limit" type="integer">Maximum results per page.</ResponseField>
-<ResponseField name="offset" type="integer">Current page offset.</ResponseField>
-
 ## Normalisation
 
-The `query` parameter is normalised before matching using the same logic applied to the database:
+The `query` parameter is normalised before matching using the same logic applied to the database — lowercased, with whitespace and punctuation stripped:
 
 | Input | Normalised |
 |---|---|

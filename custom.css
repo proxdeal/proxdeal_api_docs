@@ -63,6 +63,18 @@ header a span[class*="rounded"] {
   border-radius: 0;
 }
 
+/* Recolor the "required" pill off Mintlify's default red onto the brand blue.
+   The pill carries text-red-600 / bg-red-100 utility classes, so override both. */
+[data-component-part="field-required-pill"] {
+  color: #296bff !important;
+  background-color: rgba(41, 107, 255, 0.1) !important;
+}
+
+.dark [data-component-part="field-required-pill"] {
+  color: #6f9bff !important;
+  background-color: rgba(41, 107, 255, 0.15) !important;
+}
+
 /* Right-align the navbar controls (Dashboard + theme toggle) with the right
    edge of the "On this page" rail, which only appears at xl (>=1280px).
    The rail ends 32px inside the centered max-width container; the controls

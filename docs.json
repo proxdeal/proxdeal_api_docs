@@ -7,7 +7,7 @@
     "light": "#296bff",
     "dark": "#0d0069"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon.png",
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
@@ -39,6 +39,7 @@
       },
       {
         "tab": "API Overview",
+        "openapi": "/openapi.json",
         "pages": [
           "api-reference/overview",
           {
@@ -82,12 +83,6 @@
             "pages": [
               "api-reference/identify/identify-company",
               "api-reference/identify/identify-batch"
-            ]
-          },
-          {
-            "group": "Longlist",
-            "pages": [
-              "api-reference/longlist/generate-longlist"
             ]
           },
           {

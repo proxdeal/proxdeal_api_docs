@@ -1,65 +1,12 @@
 ---
 title: "Get Dimensions"
 description: "Retrieve the 12 business model dimensions for a company by website URL."
+openapi: "GET /v0/dimensions"
 ---
-
-```
-GET https://api.proxdeal.com/v0/dimensions?url={url}
-```
 
 Returns the 12 business model dimension classifications for any URL that has already been scraped and classified. The URL is normalised to its bare domain before matching.
 
 If no classification exists for the URL yet, use [Analyze Website](/api-reference/website/analyze-website) to trigger scraping and classification first.
-
-## Query parameters
-
-<ParamField query="url" type="string" required>
-  Website URL. Normalised to bare domain before matching (protocol, `www.`, paths, and query parameters are stripped).
-</ParamField>
-
-## Example
-
-<CodeGroup>
-```bash cURL
-curl "https://api.proxdeal.com/v0/dimensions?url=https://www.beispiel.de" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-```python Python
-import httpx
-
-resp = httpx.get(
-    "https://api.proxdeal.com/v0/dimensions",
-    params={"url": "https://www.beispiel.de"},
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-)
-dims = resp.json()["data"]
-```
-</CodeGroup>
-
-## Response
-
-```json
-{
-  "status": "success",
-  "data": {
-    "company_id": null,
-    "d1_value_delivery": ["Digital_Software"],
-    "d2_value_chain_position": "Application_EndUser",
-    "d3_customer_type": ["B2B_SME"],
-    "d4_market_positioning": "Niche_Specialist",
-    "d5_revenue_model": ["Subscription_Recurring"],
-    "d6_pricing_mechanism": ["Per_Seat_User"],
-    "d7_gtm_motion": ["Sales_Led_Direct"],
-    "d8_expansion_mechanic": ["Seat_User_Expansion"],
-    "d9_scaling_engine": "Data_Flywheel",
-    "d10_lock_in_mechanism": ["Technical_Integration"],
-    "d11_growth_bottleneck": ["Talent_Acquisition"],
-    "d12_geographic_scope": "National",
-    "quantified_at": "2026-01-10T08:47:00Z"
-  },
-  "request_id": "req_abc123def456"
-}
-```
 
 ## Dimension reference
 
@@ -79,14 +26,6 @@ Each dimension uses a fixed controlled vocabulary. Single-select dimensions retu
 | `d10_lock_in_mechanism` | multi (1–2) | `Technical_Integration`, `Data_Gravity`, `Contractual_SLA`, `Workflow_Process_Embed`, `Relationship_Trust_Dependency`, `Regulatory_Compliance`, `Low_Easily_Replaceable` |
 | `d11_growth_bottleneck` | multi (1–2) | `Talent_Acquisition`, `Capital_CAPEX`, `Regulatory_Approval`, `Market_Size_TAM`, `Technology_Maturity`, `Zero_Friction_Scalable` |
 | `d12_geographic_scope` | single | `Hyperlocal`, `Regional`, `National`, `Multi_Country`, `Global` |
-
-<ResponseField name="data.company_id" type="null">
-  Always `null` — no ProxDeal `company_id` is resolved from a URL lookup.
-</ResponseField>
-
-<ResponseField name="data.quantified_at" type="string">
-  ISO 8601 timestamp of when the classification was last computed.
-</ResponseField>
 
 ## Errors
 

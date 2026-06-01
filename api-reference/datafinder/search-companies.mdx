@@ -1,41 +1,16 @@
 ---
 title: "Search Companies"
 description: "Filter the full DACH company database using structured criteria."
+openapi: "POST /v0/search/companies"
 ---
 
-```
-POST https://api.proxdeal.com/v0/search/companies
-```
+Filter-based company discovery across the full ProxDeal DACH database. Supports six filter groups: legal attributes, geography, financial metrics, industry, web presence, and description keywords. Filters across groups are combined with AND logic, and the endpoint returns a paginated list of matching companies.
 
-Filter-based company discovery across the full ProxDeal DACH database. Supports 6 filter groups: financial metrics, geography, industry, legal attributes, web presence, and description keywords. Filters across groups are combined with AND logic. Returns a paginated list of matching companies.
-
-Unlike the [Lookup](/api-reference/lookup/lookup-by-name) endpoints (which resolve a specific company), the DataFinder is designed for structured discovery — for example, finding all active GmbHs in Bayern with revenue above €1M.
-
-## Request body
-
-```json
-{
-  "filters": { ... },
-  "limit": 20,
-  "offset": 0
-}
-```
-
-<ParamField body="filters" type="object" required>
-  Filter criteria. At least one field across all groups must be non-null.
-</ParamField>
-
-<ParamField body="limit" type="integer" default="20">
-  Maximum results to return. Range: 1–100.
-</ParamField>
-
-<ParamField body="offset" type="integer" default="0">
-  Number of results to skip for pagination.
-</ParamField>
+Unlike the [Lookup](/api-reference/lookup/lookup-by-name) endpoints (which resolve a specific company), the DataFinder is designed for structured discovery — for example, finding all active GmbHs in Bayern with revenue above €1M. At least one field across any group must be set.
 
 ## Filter groups
 
-All groups are optional, but at least one field in any group must be set.
+The `filters` object accepts the groups below. Each table documents the field's **match semantics** — exact, partial, range, or list-OR — which the schema alone does not convey.
 
 <AccordionGroup>
 
@@ -128,116 +103,6 @@ Applied against AI-generated German company descriptions.
 </Accordion>
 
 </AccordionGroup>
-
-## Example
-
-```json
-{
-  "filters": {
-    "legal": {
-      "company_legal_forms": ["GmbH", "AG"],
-      "company_active": true,
-      "founding_date_min": "2010-01-01"
-    },
-    "location": {
-      "country_iso_codes": ["DE"],
-      "address_states": ["Bayern"]
-    },
-    "financial": {
-      "revenue_min": 1000000,
-      "revenue_max": 50000000,
-      "employees_min": 10,
-      "employees_max": 250
-    },
-    "industry": {
-      "wz2025_codes": ["62.01", "62.02"],
-      "employees_class": ["10-49", "50-249"]
-    },
-    "keywords": {
-      "positive": ["software", "cloud"],
-      "negative": ["insolvenz", "liquidation"]
-    }
-  },
-  "limit": 20,
-  "offset": 0
-}
-```
-
-<CodeGroup>
-```bash cURL
-curl -X POST https://api.proxdeal.com/v0/search/companies \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"filters":{"location":{"country_iso_codes":["DE"]},"financial":{"revenue_min":5000000}},"limit":10}'
-```
-```python Python
-import httpx
-
-resp = httpx.post(
-    "https://api.proxdeal.com/v0/search/companies",
-    json={
-        "filters": {
-            "location": {"country_iso_codes": ["DE"]},
-            "financial": {"revenue_min": 5_000_000},
-        },
-        "limit": 10,
-    },
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-)
-results = resp.json()
-```
-```typescript TypeScript
-const resp = await fetch("https://api.proxdeal.com/v0/search/companies", {
-  method: "POST",
-  headers: {
-    Authorization: "Bearer YOUR_API_KEY",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    filters: {
-      location: { country_iso_codes: ["DE"] },
-      financial: { revenue_min: 5_000_000 },
-    },
-    limit: 10,
-  }),
-});
-const data = await resp.json();
-```
-</CodeGroup>
-
-## Response
-
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "company_id": "de-4qcggwpkw4dd41qa",
-      "company_legal_name": "Mustermann Technologie GmbH",
-      "company_legal_form": "GmbH",
-      "register_number": "HRB 12345",
-      "district_court": "Amtsgericht München",
-      "register_type": "HRB",
-      "company_active": true,
-      "country_iso_code": "DE"
-    }
-  ],
-  "total_count": 842,
-  "limit": 20,
-  "offset": 0,
-  "message": "Found 842 matching companies",
-  "timestamp": "2026-02-18T10:30:00Z",
-  "request_id": "req_abc123def456"
-}
-```
-
-<ResponseField name="data" type="object[]">
-  Matching companies (lightweight — use `GET /v0/company/{id}` for full profiles).
-</ResponseField>
-
-<ResponseField name="total_count" type="integer">
-  Total matching companies across all pages.
-</ResponseField>
 
 ## Errors
 
