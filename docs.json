@@ -103,21 +103,7 @@
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Dashboard",
-          "href": "https://app.proxdeal.com",
-          "icon": "gauge"
-        },
-        {
-          "anchor": "Support",
-          "href": "mailto:info@proxdeal.com",
-          "icon": "envelope"
-        }
-      ]
-    }
+    ]
   },
   "contextual": {
     "options": [
