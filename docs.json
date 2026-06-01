@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "ProxDeal API",
   "colors": {
-    "primary": "#010668",
+    "primary": "#0000ed",
     "light": "#2596be",
-    "dark": "#010668"
+    "dark": "#0000ed"
   },
   "favicon": "/favicon.svg",
   "logo": {

@@ -9,3 +9,9 @@
 .card [class*="rounded"] {
   border-radius: 0 !important;
 }
+
+/* Restore consistent vertical spacing between rows (Mintlify sets gap-y-0 and
+   relies on each card's my-2, which we removed above). Match the 1rem column gap. */
+.card-group {
+  row-gap: 1rem !important;
+}
