@@ -1,15 +1,9 @@
-/* Square card corners — targets Mintlify's Card component (class="card ...rounded-2xl...") */
+/* Square card corners — Mintlify Card component has class="card ...rounded-2xl..." */
 .card,
 .card *,
 .card::before,
 .card::after {
   border-radius: 0 !important;
-}
-
-/* Equal height across all rows — target any grid/flex container that holds .card children */
-:has(> .card) {
-  align-items: stretch !important;
-  grid-auto-rows: 1fr !important;
 }
 
 .card {
