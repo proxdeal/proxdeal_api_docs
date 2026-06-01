@@ -55,13 +55,13 @@ header a span[class*="rounded"] {
   border-radius: 0;
 }
 
-/* Align the navbar right controls (Dashboard + theme toggle) with the left
+/* Right-align the navbar controls (Dashboard + theme toggle) with the right
    edge of the "On this page" rail, which only appears at xl (>=1280px).
-   The rail is a fixed 304px column + 32px gutter inside the centered
-   max-width container, and the controls sit 48px (px-12) inside that same
-   container's right edge, so a constant 119px left shift lines them up. */
+   The rail ends 32px inside the centered max-width container; the controls
+   sit 48px (px-12) inside that same edge, so a constant -16px nudges the
+   toggle's right edge onto the panel's right edge. */
 @media (min-width: 1280px) {
   header .ml-auto.justify-end.space-x-4 {
-    margin-right: 119px !important;
+    margin-right: -16px !important;
   }
 }
