@@ -7,6 +7,8 @@ description: "All ProxDeal API endpoints — lookup, company data, financials, o
 
 All endpoints require an `Authorization: Bearer YOUR_API_KEY` header unless noted otherwise.
 
+## Company data
+
 <CardGroup cols={2}>
   <Card title="Lookup" icon="magnifying-glass" href="/api-reference/lookup/lookup-by-name">
     Resolve a company name or website URL to a ProxDeal `company_id`.
@@ -23,12 +25,22 @@ All endpoints require an `Authorization: Bearer YOUR_API_KEY` header unless note
   <Card title="Website" icon="globe" href="/api-reference/website/analyze-website">
     Scrape and classify any company website across 12 business model dimensions.
   </Card>
+</CardGroup>
+
+## AI-powered discovery
+
+<CardGroup cols={2}>
   <Card title="Identify" icon="fingerprint" href="/api-reference/identify/identify-company">
     Resolve free text or a CSV file to ProxDeal company IDs using an LLM pipeline.
   </Card>
   <Card title="Longlist" icon="list-check" href="/api-reference/longlist/generate-longlist">
     AI-powered agentic discovery — generate a ranked longlist of matching DACH companies.
   </Card>
+</CardGroup>
+
+## System
+
+<CardGroup cols={2}>
   <Card title="System" icon="circle-check" href="/api-reference/system/health">
     Health check and pricing endpoints.
   </Card>
