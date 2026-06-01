@@ -28,6 +28,14 @@
   height: 1.25rem !important;
 }
 
+/* The shrunk svg is top-aligned in its 24px size-6 wrapper; center it so the
+   icon sits optically centered between the card's top edge and the title. */
+.card div.size-6 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 /* Less-rounded Dashboard button: its filled background is an inset span. */
 header a span[class*="rounded"] {
   border-radius: 0.2rem !important;
