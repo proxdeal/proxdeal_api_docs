@@ -1,0 +1,35 @@
+---
+title: "API Reference"
+description: "All ProxDeal API endpoints — lookup, company data, financials, ownership, search, and AI-powered discovery."
+---
+
+**Base URL:** `https://api.proxdeal.com`
+
+All endpoints require an `Authorization: Bearer YOUR_API_KEY` header unless noted otherwise.
+
+<CardGroup cols={2}>
+  <Card title="Lookup" icon="magnifying-glass" href="/api-reference/lookup/lookup-by-name">
+    Resolve a company name or website URL to a ProxDeal `company_id`.
+  </Card>
+  <Card title="Company" icon="building" href="/api-reference/company/get-company">
+    Full company profiles: register data, address, industry, financials, representatives.
+  </Card>
+  <Card title="DataFinder" icon="filter" href="/api-reference/datafinder/search-companies">
+    Filter the full DACH database by financials, geography, industry, legal form, and keywords.
+  </Card>
+  <Card title="Shareholders" icon="sitemap" href="/api-reference/shareholders/get-direct">
+    Direct shareholders, ultimate beneficial owners, and full ownership trees.
+  </Card>
+  <Card title="Website" icon="globe" href="/api-reference/website/analyze-website">
+    Scrape and classify any company website across 12 business model dimensions.
+  </Card>
+  <Card title="Identify" icon="fingerprint" href="/api-reference/identify/identify-company">
+    Resolve free text or a CSV file to ProxDeal company IDs using an LLM pipeline.
+  </Card>
+  <Card title="Longlist" icon="list-check" href="/api-reference/longlist/generate-longlist">
+    AI-powered agentic discovery — generate a ranked longlist of matching DACH companies.
+  </Card>
+  <Card title="System" icon="circle-check" href="/api-reference/system/health">
+    Health check and pricing endpoints.
+  </Card>
+</CardGroup>
