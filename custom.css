@@ -1,14 +1,16 @@
-/* Remove rounded corners from Card components */
-a[class*="CardGroup"] > *,
-div[class*="card"],
-.group\/card,
-[data-component="card"],
-.card-container {
+/* Square card corners */
+.card {
   border-radius: 0 !important;
 }
 
-/* Target Mintlify card wrapper divs */
-.CardGroup a > div,
-a[href] > div[class*="border"] {
-  border-radius: 0 !important;
+/* Equal-height cards across all rows in a CardGroup grid */
+.card-group {
+  align-items: stretch !important;
+  grid-auto-rows: 1fr !important;
+}
+
+.card-group .card {
+  height: 100% !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
