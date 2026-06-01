@@ -1,12 +1,13 @@
-/* Square card corners — Mintlify Card component has class="card ...rounded-2xl..." */
-.card,
-.card *,
-.card::before,
-.card::after {
+/* Mintlify uses bare element selectors (no dot/hash) for built-in components */
+card {
   border-radius: 0 !important;
 }
 
-.card {
+card * {
+  border-radius: 0 !important;
+}
+
+card {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
