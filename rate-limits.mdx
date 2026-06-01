@@ -1,0 +1,48 @@
+---
+title: "Rate Limits"
+description: "How rate limits work and how to handle 429 responses."
+---
+
+Rate limits are enforced at **two levels** — per API key and per project — across **three time windows**: per minute, per day, and per month. The most restrictive applicable limit is always enforced.
+
+## Response headers
+
+Every API response includes headers showing your current usage:
+
+| Header | Description |
+|---|---|
+| `X-RateLimit-Limit` | Maximum requests allowed in the current window |
+| `X-RateLimit-Remaining` | Requests remaining in the current window |
+| `X-RateLimit-Reset` | Seconds until the current window resets |
+| `X-Request-ID` | Unique identifier for this request |
+
+## Handling 429 responses
+
+When a rate limit is exceeded, the API returns `429 Too Many Requests` with a `Retry-After` header:
+
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "details": "Rate limit exceeded for this API key"
+  },
+  "message": "Rate limit exceeded",
+  "request_id": "req_abc123def456"
+}
+```
+
+The `Retry-After` header tells you how many seconds to wait before retrying.
+
+## Best practices
+
+- **Respect `Retry-After`** — do not retry immediately on a 429; wait the indicated number of seconds
+- **Use exponential backoff** for batch jobs — start with the `Retry-After` value and double on subsequent failures
+- **Cache results** where possible — company profiles and financials change infrequently; a 24-hour TTL is reasonable for most data
+- **Monitor `X-RateLimit-Remaining`** — back off proactively when remaining drops below 10% of the limit
+
+## IP throttling
+
+Beyond the standard rate limits, the API tracks failed authentication attempts per IP address. Exceeding **20 failed auth requests within one minute** triggers `429 IP_THROTTLED` for that IP until the window resets.
+
+This is separate from key-based rate limits and only triggered by authentication failures, not normal usage.

@@ -1,0 +1,90 @@
+---
+title: "Get Historic Financials"
+description: "Retrieve all available annual financial reports for a company, sorted newest first."
+---
+
+<Note>**Pricing:** €0.15 per successful call</Note>
+
+```
+GET https://api.proxdeal.com/v0/company/{company_id}/financials/historic
+```
+
+Returns the full time-series of all available financial reports for a company, sorted by fiscal year descending. Unlike [Get Financials](/api-reference/company/get-financials) which returns only the most recent report, this endpoint returns every available filing from Unternehmensregister or Firmenbuch.
+
+## Path parameters
+
+<ParamField path="company_id" type="string" required>
+  The unique ProxDeal company identifier.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials/historic \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+```python Python
+import httpx
+
+resp = httpx.get(
+    "https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials/historic",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+reports = resp.json()["data"]  # list, newest first
+```
+```typescript TypeScript
+const resp = await fetch(
+  "https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials/historic",
+  { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+);
+const { data, count } = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "company_id": "de-0001z7cs0ej81r1w",
+      "finreport_year": 2023,
+      "revenue": 12500000.0,
+      "employees": 45,
+      "..."
+    },
+    {
+      "company_id": "de-0001z7cs0ej81r1w",
+      "finreport_year": 2022,
+      "revenue": 11200000.0,
+      "employees": 40,
+      "..."
+    }
+  ],
+  "count": 5,
+  "message": "5 financial report(s) retrieved successfully",
+  "timestamp": "2026-01-15T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+## Response fields
+
+<ResponseField name="data" type="object[]">
+  Array of financial report objects sorted by `finreport_year` descending. Each object has the same fields as [Get Financials](/api-reference/company/get-financials#response-fields).
+</ResponseField>
+
+<ResponseField name="count" type="integer">
+  Total number of reports returned.
+</ResponseField>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 404 | `FINANCIALS_NOT_FOUND` | No financial data exists for this company ID |
+| 400 | `INVALID_COMPANY_ID` | The ID contains invalid characters |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

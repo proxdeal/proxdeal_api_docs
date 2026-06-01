@@ -1,0 +1,116 @@
+---
+title: "Ultimate Beneficial Owners (UBO)"
+description: "Recursively identify the natural persons at the top of an ownership chain."
+---
+
+<Note>**Pricing:** €0.25 per successful call</Note>
+
+```
+GET https://api.proxdeal.com/v0/company/{company_id}/shareholders/ubo
+```
+
+Recursively traverses the ownership chain to identify ultimate beneficial owners — the natural persons (or unresolvable entities) at the top of the ownership structure. Traversal is capped at **5 levels** deep.
+
+If a corporate shareholder cannot be found in the ProxDeal database, it is returned as a terminal node with `chain_resolved: false`.
+
+## Path parameters
+
+<ParamField path="company_id" type="string" required>
+  The unique ProxDeal company identifier.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/v0/company/ch-0014647r03vx3geg/shareholders/ubo \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+```python Python
+import httpx
+
+resp = httpx.get(
+    "https://api.proxdeal.com/v0/company/ch-0014647r03vx3geg/shareholders/ubo",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+ubos = resp.json()["data"]
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "shareholder_type": "person",
+      "is_natural_person": true,
+      "shareholder_person_first_name": "Max",
+      "shareholder_person_last_name": "Mustermann",
+      "shareholder_person_birth_date": "1970-04-12",
+      "shareholder_company_legal_name": null,
+      "percent": 60.0,
+      "depth": 1,
+      "chain_resolved": true,
+      "ownership_chain": ["ch-0014647r03vx3geg"]
+    },
+    {
+      "shareholder_type": "company",
+      "is_natural_person": false,
+      "shareholder_person_first_name": null,
+      "shareholder_company_legal_name": "Offshore Holdings Ltd",
+      "shareholder_company_register_number": null,
+      "percent": 40.0,
+      "depth": 2,
+      "chain_resolved": false,
+      "ownership_chain": ["ch-0014647r03vx3geg", "de-0abc123def456"]
+    }
+  ],
+  "count": 2,
+  "max_depth_reached": false,
+  "message": "2 UBO(s) retrieved successfully",
+  "timestamp": "2026-01-15T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+## Response fields
+
+<ResponseField name="data" type="object[]">
+  UBOs and terminal entities.
+
+  <Expandable title="UBO item">
+    <ResponseField name="shareholder_type" type="string | null">`"person"` or `"company"` (if chain could not be fully resolved).</ResponseField>
+    <ResponseField name="is_natural_person" type="boolean | null">Whether this is a natural person.</ResponseField>
+    <ResponseField name="shareholder_person_first_name" type="string | null">First name.</ResponseField>
+    <ResponseField name="shareholder_person_last_name" type="string | null">Last name.</ResponseField>
+    <ResponseField name="shareholder_person_birth_date" type="string | null">Date of birth.</ResponseField>
+    <ResponseField name="shareholder_company_legal_name" type="string | null">Legal name, if this is an unresolved corporate terminal node.</ResponseField>
+    <ResponseField name="shareholder_company_register_number" type="string | null">Register number.</ResponseField>
+    <ResponseField name="shareholder_company_district_court" type="string | null">District court.</ResponseField>
+    <ResponseField name="percent" type="number | null">Direct ownership percentage at this node. Not the cumulative effective percentage.</ResponseField>
+    <ResponseField name="depth" type="integer">Number of ownership hops from the queried company (`1` = direct shareholder).</ResponseField>
+    <ResponseField name="chain_resolved" type="boolean">
+      `false` if the chain was cut short because an intermediate company could not be resolved in the database. The node is returned as-is.
+    </ResponseField>
+    <ResponseField name="ownership_chain" type="string[]">
+      Array of `company_id` values representing the path from the queried company to this UBO.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="integer">Number of UBOs returned.</ResponseField>
+
+<ResponseField name="max_depth_reached" type="boolean">
+  `true` if the traversal was cut short at the 5-level depth limit. The chain may not be fully resolved.
+</ResponseField>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 400 | `INVALID_COMPANY_ID` | ID contains invalid characters |
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 404 | `SHAREHOLDERS_NOT_FOUND` | No shareholder data exists for this company ID |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

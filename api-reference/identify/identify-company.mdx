@@ -1,0 +1,117 @@
+---
+title: "Identify Company"
+description: "Resolve free text to a ProxDeal company ID using an LLM pipeline."
+---
+
+<Note>**Pricing:** €0.02 per successful resolution (no charge on failure)</Note>
+
+```
+POST https://api.proxdeal.com/v0/identify/company
+```
+
+Resolves a free-text string to a `company_id` in the ProxDeal DACH database using a two-stage LLM pipeline: field extraction followed by candidate ranking. Returns the top match with a confidence score plus up to 4 alternative candidates.
+
+**You are only charged when a company is successfully resolved.** If the pipeline cannot match the input, no credit is deducted.
+
+For bulk resolution of a CSV or Excel file, use [Identify Batch](/api-reference/identify/identify-batch).
+
+## Request body
+
+<ParamField body="text" type="string" required>
+  Free-text description of the company to identify. Can be a company name, a combination of name and location, a description from a document, or any other text that refers to a DACH company. The richer the input, the better the match quality.
+
+  Examples:
+  - `"Siemens AG München"`
+  - `"the Munich-based industrial conglomerate founded in 1847"`
+  - `"Holzstudio Sahm GmbH & Co. KG, HRB 12345"`
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.proxdeal.com/v0/identify/company \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Siemens AG München"}'
+```
+```python Python
+import httpx
+
+resp = httpx.post(
+    "https://api.proxdeal.com/v0/identify/company",
+    json={"text": "Siemens AG München"},
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=60.0,
+)
+result = resp.json()
+```
+```typescript TypeScript
+const resp = await fetch("https://api.proxdeal.com/v0/identify/company", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ text: "Siemens AG München" }),
+  signal: AbortSignal.timeout(60_000),
+});
+const result = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "message": "Company identified successfully",
+  "top_match": {
+    "company_id": "de-4qcggwpkw4dd41qa",
+    "company_legal_name": "Siemens Aktiengesellschaft",
+    "confidence": 0.97,
+    "match_reason": "Exact name match with registered headquarters in München"
+  },
+  "alternatives": [
+    {
+      "company_id": "de-0001z7cs0ej81r1w",
+      "company_legal_name": "Siemens Energy AG",
+      "confidence": 0.61
+    }
+  ],
+  "request_id": "req_abc123def456"
+}
+```
+
+<ResponseField name="status" type="string">
+  `"success"` when a top match was found; `"failure"` when no match could be resolved (no charge on failure).
+</ResponseField>
+
+<ResponseField name="top_match" type="object | null">
+  The best matching company. `null` if no match was resolved.
+
+  <Expandable title="Top match fields">
+    <ResponseField name="company_id" type="string">ProxDeal company identifier — use with `GET /v0/company/{id}`.</ResponseField>
+    <ResponseField name="company_legal_name" type="string">Official legal name of the matched company.</ResponseField>
+    <ResponseField name="confidence" type="number">Match confidence score (0.0–1.0). Higher is better.</ResponseField>
+    <ResponseField name="match_reason" type="string">Human-readable explanation of why this company was selected.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="alternatives" type="object[]">
+  Up to 4 alternative candidate matches with lower confidence scores.
+</ResponseField>
+
+<Warning>
+  This endpoint calls an LLM pipeline. Typical response time is 3–10 seconds. Set your client timeout to at least 60 seconds.
+</Warning>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 400 | — | Invalid or empty request body |
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |
+| 503 | — | Identify service temporarily unavailable |
+| 504 | — | Identify service timed out |

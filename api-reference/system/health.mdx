@@ -1,0 +1,52 @@
+---
+title: "Health Check"
+description: "Verify that the API is operational. No authentication required."
+---
+
+<Note>**Pricing:** Free — no credits deducted</Note>
+
+```
+GET https://api.proxdeal.com/health
+```
+
+Returns the current health status of the API. This endpoint does **not** require authentication and is safe to use as a liveness probe.
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/health
+```
+```python Python
+import httpx
+
+resp = httpx.get("https://api.proxdeal.com/health")
+print(resp.json())
+```
+```typescript TypeScript
+const resp = await fetch("https://api.proxdeal.com/health");
+const status = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "healthy",
+  "service": "proxdeal-api",
+  "version": "0.1.0"
+}
+```
+
+<ResponseField name="status" type="string">
+  `"healthy"` when the service is operational.
+</ResponseField>
+
+<ResponseField name="service" type="string">
+  Always `"proxdeal-api"`.
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  Current API version.
+</ResponseField>

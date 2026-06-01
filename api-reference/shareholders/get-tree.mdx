@@ -1,0 +1,126 @@
+---
+title: "Shareholder Ownership Tree"
+description: "Get the full nested ownership tree rooted at a company."
+---
+
+<Note>**Pricing:** €0.25 per successful call</Note>
+
+```
+GET https://api.proxdeal.com/v0/company/{company_id}/shareholders/tree
+```
+
+Returns the full nested ownership tree rooted at the queried company. Corporate shareholder nodes expand recursively up to **5 levels** deep. Natural persons and unresolvable companies are leaf nodes.
+
+Use this endpoint when you need the complete ownership picture in a single hierarchical structure — for due diligence, compliance screening, or visualising corporate trees.
+
+## Path parameters
+
+<ParamField path="company_id" type="string" required>
+  The unique ProxDeal company identifier.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/v0/company/ch-0014647r03vx3geg/shareholders/tree \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+```python Python
+import httpx
+
+resp = httpx.get(
+    "https://api.proxdeal.com/v0/company/ch-0014647r03vx3geg/shareholders/tree",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+tree = resp.json()["data"]
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "company_id": "ch-0014647r03vx3geg",
+    "label": "Target GmbH",
+    "shareholder_type": "company",
+    "is_natural_person": false,
+    "percent": null,
+    "depth": 0,
+    "resolved": true,
+    "shareholders": [
+      {
+        "company_id": "de-0abc123def456",
+        "label": "Holding Alpha GmbH",
+        "shareholder_type": "company",
+        "is_natural_person": false,
+        "percent": 60.0,
+        "depth": 1,
+        "resolved": true,
+        "shareholders": [
+          {
+            "company_id": null,
+            "label": "Max Mustermann",
+            "shareholder_type": "person",
+            "is_natural_person": true,
+            "percent": 100.0,
+            "depth": 2,
+            "resolved": true,
+            "shareholders": []
+          }
+        ]
+      },
+      {
+        "company_id": null,
+        "label": "Offshore Holdings Ltd",
+        "shareholder_type": "company",
+        "is_natural_person": false,
+        "percent": 40.0,
+        "depth": 1,
+        "resolved": false,
+        "shareholders": []
+      }
+    ]
+  },
+  "max_depth_reached": false,
+  "message": "Shareholder tree retrieved successfully",
+  "timestamp": "2026-01-15T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+## Response fields
+
+<ResponseField name="data" type="object">
+  The root node of the ownership tree (the queried company itself).
+
+  <Expandable title="Tree node (recursive)">
+    <ResponseField name="company_id" type="string | null">ProxDeal `company_id` of this node. `null` for natural persons or unresolved corporate nodes.</ResponseField>
+    <ResponseField name="label" type="string">Display name: legal name for companies, full name for persons.</ResponseField>
+    <ResponseField name="shareholder_type" type="string | null">`"person"` or `"company"`.</ResponseField>
+    <ResponseField name="is_natural_person" type="boolean | null">Whether this node is a natural person.</ResponseField>
+    <ResponseField name="percent" type="number | null">Ownership percentage in the parent company. `null` for the root node.</ResponseField>
+    <ResponseField name="depth" type="integer">Depth from the root (root = 0).</ResponseField>
+    <ResponseField name="resolved" type="boolean">
+      `false` if this corporate node could not be found in the ProxDeal database. Its `shareholders` array will be empty.
+    </ResponseField>
+    <ResponseField name="shareholders" type="object[]">
+      This node's own shareholders. Recursively follows the same structure. Empty for persons and unresolved nodes.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="max_depth_reached" type="boolean">
+  `true` if the traversal was cut at the 5-level depth limit.
+</ResponseField>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 400 | `INVALID_COMPANY_ID` | ID contains invalid characters |
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 404 | `SHAREHOLDERS_NOT_FOUND` | No shareholder data exists for this company ID |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

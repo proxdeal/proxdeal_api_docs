@@ -1,38 +1,13 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "ProxDeal API",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#010668",
+    "light": "#2596be",
+    "dark": "#010668"
   },
   "favicon": "/favicon.svg",
-  "navigation": {
-    "pages": [
-      {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
-        ]
-      }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg"
@@ -41,13 +16,106 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:info@proxdeal.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "href": "https://app.proxdeal.com"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "pages": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "index",
+              "quickstart",
+              "authentication",
+              "rate-limits",
+              "errors"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "pages": [
+          {
+            "group": "Company",
+            "pages": [
+              "api-reference/company/get-company",
+              "api-reference/company/get-financials",
+              "api-reference/company/get-financials-historic"
+            ]
+          },
+          {
+            "group": "Lookup",
+            "pages": [
+              "api-reference/lookup/lookup-by-name",
+              "api-reference/lookup/lookup-by-url"
+            ]
+          },
+          {
+            "group": "DataFinder",
+            "pages": [
+              "api-reference/datafinder/search-companies"
+            ]
+          },
+          {
+            "group": "Website",
+            "pages": [
+              "api-reference/website/analyze-website",
+              "api-reference/website/get-dimensions"
+            ]
+          },
+          {
+            "group": "Shareholders",
+            "pages": [
+              "api-reference/shareholders/get-direct",
+              "api-reference/shareholders/get-ubo",
+              "api-reference/shareholders/get-tree"
+            ]
+          },
+          {
+            "group": "Identify",
+            "pages": [
+              "api-reference/identify/identify-company",
+              "api-reference/identify/identify-batch"
+            ]
+          },
+          {
+            "group": "Longlist",
+            "pages": [
+              "api-reference/longlist/generate-longlist"
+            ]
+          },
+          {
+            "group": "System",
+            "pages": [
+              "api-reference/system/health"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Dashboard",
+          "href": "https://app.proxdeal.com",
+          "icon": "gauge"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:info@proxdeal.com",
+          "icon": "envelope"
+        }
+      ]
     }
   },
   "contextual": {
@@ -56,17 +124,14 @@
       "view",
       "chatgpt",
       "claude",
-      "perplexity",
-      "mcp",
       "cursor",
       "vscode"
     ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "linkedin": "https://www.linkedin.com/company/proxdeal",
+      "github": "https://github.com/proxdeal"
     }
   }
 }

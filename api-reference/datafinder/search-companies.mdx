@@ -1,0 +1,254 @@
+---
+title: "Search Companies"
+description: "Filter the full DACH company database using structured criteria."
+---
+
+<Note>**Pricing:** €0.10 per successful call</Note>
+
+```
+POST https://api.proxdeal.com/v0/search/companies
+```
+
+Filter-based company discovery across the full ProxDeal DACH database. Supports 6 filter groups: financial metrics, geography, industry, legal attributes, web presence, and description keywords. Filters across groups are combined with AND logic. Returns a paginated list of matching companies.
+
+Unlike the [Lookup](/api-reference/lookup/lookup-by-name) endpoints (which resolve a specific company), the DataFinder is designed for structured discovery — for example, finding all active GmbHs in Bayern with revenue above €1M.
+
+## Request body
+
+```json
+{
+  "filters": { ... },
+  "limit": 20,
+  "offset": 0
+}
+```
+
+<ParamField body="filters" type="object" required>
+  Filter criteria. At least one field across all groups must be non-null.
+</ParamField>
+
+<ParamField body="limit" type="integer" default="20">
+  Maximum results to return. Range: 1–100.
+</ParamField>
+
+<ParamField body="offset" type="integer" default="0">
+  Number of results to skip for pagination.
+</ParamField>
+
+## Filter groups
+
+All groups are optional, but at least one field in any group must be set.
+
+<AccordionGroup>
+
+<Accordion title="filters.legal — Legal & register filters">
+
+| Field | Type | Match | Description |
+|---|---|---|---|
+| `company_legal_name` | string | partial, case-insensitive | Legal name contains this value |
+| `register_number` | string | exact | Commercial register number (e.g. `HRB 12345`) |
+| `district_court` | string | partial, case-insensitive | District court contains this value |
+| `register_types` | string[] | list OR | Register types to include: `HRB`, `HRA`, `FN` |
+| `company_legal_forms` | string[] | list OR | Legal forms to include (e.g. `["GmbH", "AG"]`) |
+| `company_active` | boolean | exact | `true` = active only, `false` = inactive only |
+| `founding_date_min` | date string | `>=` | Minimum founding date (e.g. `"2010-01-01"`) |
+| `founding_date_max` | date string | `<=` | Maximum founding date |
+| `company_age_min` | integer | `>=` | Minimum company age in years |
+| `company_age_max` | integer | `<=` | Maximum company age in years |
+
+</Accordion>
+
+<Accordion title="filters.location — Address & geography">
+
+| Field | Type | Match | Description |
+|---|---|---|---|
+| `country_iso_codes` | string[] | list OR | Countries: `AT`, `DE`, `CH` |
+| `address_states` | string[] | case-insensitive exact, list OR | Bundesländer / cantons (e.g. `["Bayern", "Baden-Württemberg"]`) |
+| `address_cities` | string[] | case-insensitive exact, list OR | Cities |
+| `address_zipcode_prefix` | string | prefix | ZIP codes starting with this value (e.g. `"80"` for Munich area) |
+| `address_zipcode_min` | string | `>=` numeric | Minimum ZIP for range filtering |
+| `address_zipcode_max` | string | `<=` numeric | Maximum ZIP for range filtering |
+| `loc_lat` | float | — | Center latitude for radius search. Requires `loc_lng` and `loc_radius`. |
+| `loc_lng` | float | — | Center longitude for radius search. Requires `loc_lat` and `loc_radius`. |
+| `loc_radius` | float | — | Search radius in km. Required when using `loc_lat`/`loc_lng` or `loc_input`. |
+| `loc_input` | string | — | Free-text address (e.g. `"München"`) — geocoded automatically. Requires `loc_radius`. Cannot be combined with `loc_lat`/`loc_lng`. |
+
+</Accordion>
+
+<Accordion title="filters.financial — Financial metric filters">
+
+Sourced from the most recent filed financial report per company. All monetary values are in EUR.
+
+| Field | Type | Match | Description |
+|---|---|---|---|
+| `revenue_min` / `revenue_max` | float | `>=` / `<=` | Annual revenue (Umsatzerlöse) |
+| `total_assets_min` / `total_assets_max` | float | `>=` / `<=` | Total assets (Bilanzsumme) |
+| `profit_min` / `profit_max` | float | `>=` / `<=` | Balance sheet profit (Bilanzgewinn) |
+| `net_income_min` / `net_income_max` | float | `>=` / `<=` | Net income (Jahresüberschuss) |
+| `equity_min` / `equity_max` | float | `>=` / `<=` | Equity (Eigenkapital) |
+| `debt_min` / `debt_max` | float | `>=` / `<=` | Debt (Verbindlichkeiten) |
+| `cash_balance_min` / `cash_balance_max` | float | `>=` / `<=` | Cash and equivalents |
+| `provisions_min` / `provisions_max` | float | `>=` / `<=` | Provisions (Rückstellungen) |
+| `equity_ratio_min` / `equity_ratio_max` | float (0–1) | `>=` / `<=` | Equity ratio |
+| `debt_ratio_min` / `debt_ratio_max` | float (0–1) | `>=` / `<=` | Debt ratio |
+| `debt_equity_ratio_min` / `debt_equity_ratio_max` | float | `>=` / `<=` | Debt-to-equity ratio |
+| `employees_min` / `employees_max` | integer | `>=` / `<=` | Employee count |
+| `finreport_year_min` / `finreport_year_max` | integer | `>=` / `<=` | Fiscal year of the most recent report |
+
+</Accordion>
+
+<Accordion title="filters.industry — Industry classification">
+
+| Field | Type | Match | Description |
+|---|---|---|---|
+| `wz2025_codes` | string[] | array overlap (OR) | WZ2025 codes — matches if any company code is in this list (e.g. `["62.01", "62.02"]`) |
+| `industry_path_contains` | string | partial, case-insensitive | Industry path contains this value (e.g. `"Technologie > Software"`) |
+| `business_model_contains` | string | partial, case-insensitive | Business model label contains this value |
+| `type_label_ger` | string[] | exact, list OR | Exact business model labels in German (e.g. `["Dienstleister", "Produzent"]`) |
+| `employees_class` | string[] | exact, list OR | Employee size class: `"1-9"`, `"10-49"`, `"50-249"`, `"250-499"`, `"500+"` |
+
+</Accordion>
+
+<Accordion title="filters.webdata — Web presence">
+
+| Field | Type | Description |
+|---|---|---|
+| `has_website` | boolean | `true` = only companies with a known website URL |
+
+</Accordion>
+
+<Accordion title="filters.keywords — Description keyword search">
+
+Applied against AI-generated German company descriptions.
+
+| Field | Type | Description |
+|---|---|---|
+| `positive` | string[] | At least one (OR) or all (AND if `positive_match_all=true`) must appear in the description |
+| `positive_match_all` | boolean | If `true`, ALL positive keywords must appear (AND logic). Default: `false` (OR). |
+| `negative` | string[] | None of these keywords may appear in the description |
+
+</Accordion>
+
+</AccordionGroup>
+
+## Example
+
+```json
+{
+  "filters": {
+    "legal": {
+      "company_legal_forms": ["GmbH", "AG"],
+      "company_active": true,
+      "founding_date_min": "2010-01-01"
+    },
+    "location": {
+      "country_iso_codes": ["DE"],
+      "address_states": ["Bayern"]
+    },
+    "financial": {
+      "revenue_min": 1000000,
+      "revenue_max": 50000000,
+      "employees_min": 10,
+      "employees_max": 250
+    },
+    "industry": {
+      "wz2025_codes": ["62.01", "62.02"],
+      "employees_class": ["10-49", "50-249"]
+    },
+    "keywords": {
+      "positive": ["software", "cloud"],
+      "negative": ["insolvenz", "liquidation"]
+    }
+  },
+  "limit": 20,
+  "offset": 0
+}
+```
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.proxdeal.com/v0/search/companies \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"filters":{"location":{"country_iso_codes":["DE"]},"financial":{"revenue_min":5000000}},"limit":10}'
+```
+```python Python
+import httpx
+
+resp = httpx.post(
+    "https://api.proxdeal.com/v0/search/companies",
+    json={
+        "filters": {
+            "location": {"country_iso_codes": ["DE"]},
+            "financial": {"revenue_min": 5_000_000},
+        },
+        "limit": 10,
+    },
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+results = resp.json()
+```
+```typescript TypeScript
+const resp = await fetch("https://api.proxdeal.com/v0/search/companies", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    filters: {
+      location: { country_iso_codes: ["DE"] },
+      financial: { revenue_min: 5_000_000 },
+    },
+    limit: 10,
+  }),
+});
+const data = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "company_id": "de-4qcggwpkw4dd41qa",
+      "company_legal_name": "Mustermann Technologie GmbH",
+      "company_legal_form": "GmbH",
+      "register_number": "HRB 12345",
+      "district_court": "Amtsgericht München",
+      "register_type": "HRB",
+      "company_active": true,
+      "country_iso_code": "DE"
+    }
+  ],
+  "total_count": 842,
+  "limit": 20,
+  "offset": 0,
+  "message": "Found 842 matching companies",
+  "timestamp": "2026-02-18T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+<ResponseField name="data" type="object[]">
+  Matching companies (lightweight — use `GET /v0/company/{id}` for full profiles).
+</ResponseField>
+
+<ResponseField name="total_count" type="integer">
+  Total matching companies across all pages.
+</ResponseField>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 400 | `NO_FILTERS` | No filter fields were set |
+| 400 | `INVALID_PARAMETER` | Input contains null bytes |
+| 400 | `LOC_INPUT_CONFLICT` | `loc_input` used with explicit `loc_lat`/`loc_lng` |
+| 400 | `LOC_INPUT_MISSING_RADIUS` | `loc_input` set but `loc_radius` missing |
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 422 | `GEOCODE_FAILED` | `loc_input` could not be resolved to coordinates |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

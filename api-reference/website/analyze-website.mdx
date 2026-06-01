@@ -1,0 +1,177 @@
+---
+title: "Analyze Website"
+description: "Scrape and classify any company website on demand."
+---
+
+<Note>**Pricing:** Credit-based — see dashboard for current rates</Note>
+
+```
+POST https://api.proxdeal.com/v0/website/analyze
+```
+
+Given any website URL, returns structured data extracted from the company website plus all 12 business model dimension classifications. If the website has already been scraped and classified, cached results are returned immediately. Otherwise, the website is scraped on demand and the AI classification runs before the response is returned.
+
+The `source` field in the response indicates which path was taken.
+
+<Warning>
+  Response time varies significantly by path:
+  - `"cache"` — both scraped data and dimensions already existed → **under 1 second**
+  - `"fresh_quantify"` — scraped data existed, dimensions freshly generated → **10–20 seconds**
+  - `"fresh_scrape"` — website scraped and classified for the first time → **40–90 seconds**
+
+  Set your client timeout accordingly. A 120-second timeout is recommended.
+</Warning>
+
+## Request body
+
+<ParamField body="url" type="string" required>
+  Website URL to analyze. Accepts any common format — protocol, `www.`, paths, and query parameters are all stripped before matching.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.proxdeal.com/v0/website/analyze \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.beispiel.de"}'
+```
+```python Python
+import httpx
+
+resp = httpx.post(
+    "https://api.proxdeal.com/v0/website/analyze",
+    json={"url": "https://www.beispiel.de"},
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=120.0,
+)
+result = resp.json()["data"]
+print(result["source"])          # "cache" | "fresh_quantify" | "fresh_scrape"
+print(result["scraped"]["offering_description"])
+print(result["dimensions"]["d5_revenue_model"])
+```
+```typescript TypeScript
+const resp = await fetch("https://api.proxdeal.com/v0/website/analyze", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ url: "https://www.beispiel.de" }),
+  signal: AbortSignal.timeout(120_000),
+});
+const { data } = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "source": "cache",
+    "scraped": {
+      "base_url": "beispiel.de",
+      "scraped_at": "2026-01-10T08:45:00Z",
+      "company_legal_name": "Beispiel GmbH",
+      "address_line": "Musterstraße 42",
+      "address_city": "München",
+      "address_zipcode": "80331",
+      "address_country": "Deutschland",
+      "register_number": "HRB 12345",
+      "district_court": "Amtsgericht München",
+      "contact_email": ["info@beispiel.de"],
+      "contact_phone": ["+49 89 123456"],
+      "vat_id_number": "DE123456789",
+      "offering_description": "Cloud-based HR software for mid-sized companies.",
+      "services_list": ["HR software", "Payroll", "Time tracking"],
+      "products_list": ["BeispielHR Pro"],
+      "business_usp_description": "DATEV-certified, German data residency.",
+      "business_model_description": "Annual SaaS subscription per employee seat.",
+      "type_serviceprovider": false,
+      "type_manufacturer": false,
+      "type_holding": false,
+      "type_investor": false,
+      "business_clients_description": "SMEs in DACH with 50–500 employees.",
+      "business_partner_description": "Backed by XYZ Ventures.",
+      "url_profile_linkedin": "https://linkedin.com/company/beispiel-gmbh",
+      "url_profile_x_twitter": null
+    },
+    "dimensions": {
+      "d1_value_delivery": ["Digital_Software"],
+      "d2_value_chain_position": "Application_EndUser",
+      "d3_customer_type": ["B2B_SME"],
+      "d4_market_positioning": "Niche_Specialist",
+      "d5_revenue_model": ["Subscription_Recurring"],
+      "d6_pricing_mechanism": ["Per_Seat_User"],
+      "d7_gtm_motion": ["Sales_Led_Direct"],
+      "d8_expansion_mechanic": ["Seat_User_Expansion"],
+      "d9_scaling_engine": "Data_Flywheel",
+      "d10_lock_in_mechanism": ["Technical_Integration"],
+      "d11_growth_bottleneck": ["Talent_Acquisition"],
+      "d12_geographic_scope": "National",
+      "quantified_at": "2026-01-10T08:47:00Z"
+    }
+  },
+  "message": "Website analysis complete",
+  "timestamp": "2026-04-22T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+## Response fields
+
+<ResponseField name="data.source" type="string">
+  How the data was obtained: `"cache"` (both existed), `"fresh_quantify"` (dimensions freshly generated), or `"fresh_scrape"` (website newly scraped and classified).
+</ResponseField>
+
+<ResponseField name="data.scraped" type="object">
+  Structured data extracted from the website.
+
+  <Expandable title="Scraped fields">
+    <ResponseField name="base_url" type="string">Bare domain of the scraped website.</ResponseField>
+    <ResponseField name="scraped_at" type="string | null">ISO 8601 timestamp of the scrape.</ResponseField>
+    <ResponseField name="company_legal_name" type="string | null">Legal name from the imprint.</ResponseField>
+    <ResponseField name="address_line" type="string | null">Street address.</ResponseField>
+    <ResponseField name="address_city" type="string | null">City.</ResponseField>
+    <ResponseField name="address_zipcode" type="string | null">Postal code.</ResponseField>
+    <ResponseField name="address_country" type="string | null">Country.</ResponseField>
+    <ResponseField name="register_number" type="string | null">Commercial register number.</ResponseField>
+    <ResponseField name="district_court" type="string | null">District court.</ResponseField>
+    <ResponseField name="contact_email" type="string[] | null">Contact email addresses.</ResponseField>
+    <ResponseField name="contact_phone" type="string[] | null">Contact phone numbers.</ResponseField>
+    <ResponseField name="vat_id_number" type="string | null">VAT ID (Umsatzsteuer-ID).</ResponseField>
+    <ResponseField name="offering_description" type="string | null">Products and services offered.</ResponseField>
+    <ResponseField name="services_list" type="string[] | null">List of services.</ResponseField>
+    <ResponseField name="products_list" type="string[] | null">List of products.</ResponseField>
+    <ResponseField name="business_usp_description" type="string | null">Unique selling proposition.</ResponseField>
+    <ResponseField name="business_model_description" type="string | null">How the company generates revenue.</ResponseField>
+    <ResponseField name="type_serviceprovider" type="boolean | null">Whether the company is a service provider.</ResponseField>
+    <ResponseField name="type_manufacturer" type="boolean | null">Whether the company is a manufacturer.</ResponseField>
+    <ResponseField name="type_holding" type="boolean | null">Whether the company is a holding.</ResponseField>
+    <ResponseField name="type_investor" type="boolean | null">Whether the company is an investor.</ResponseField>
+    <ResponseField name="business_clients_description" type="string | null">Description of the client base.</ResponseField>
+    <ResponseField name="business_partner_description" type="string | null">Ownership and partnership structure.</ResponseField>
+    <ResponseField name="url_profile_linkedin" type="string | null">LinkedIn profile URL.</ResponseField>
+    <ResponseField name="url_profile_x_twitter" type="string | null">X/Twitter profile URL.</ResponseField>
+    <ResponseField name="url_profile_facebook" type="string | null">Facebook profile URL.</ResponseField>
+    <ResponseField name="url_profile_instagram" type="string | null">Instagram profile URL.</ResponseField>
+    <ResponseField name="url_profile_youtube" type="string | null">YouTube channel URL.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="data.dimensions" type="object | null">
+  12 business model dimension classifications. `null` if the website had insufficient content for classification. See [Get Dimensions](/api-reference/website/get-dimensions) for the full field reference.
+</ResponseField>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 422 | `INVALID_URL` | No valid domain could be extracted from the input |
+| 422 | `SCRAPE_FAILED` | Network timeout, TLS failure, or similar scraper error |
+| 422 | `SCRAPE_INSUFFICIENT` | Website reached but did not yield enough content — often bot-blocked or login-gated |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

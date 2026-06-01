@@ -1,0 +1,105 @@
+---
+title: "Lookup by URL"
+description: "Resolve a website URL to company records."
+---
+
+<Note>**Pricing:** €0.01 per successful call</Note>
+
+```
+GET https://api.proxdeal.com/v0/lookup/url
+```
+
+Resolves a website URL to matching company records by normalising the input to its bare domain and matching against the ProxDeal URL index. Protocol, `www.` prefix, paths, and query parameters are all stripped before matching.
+
+Ideal for CRM enrichment or browser extensions where you have a URL and need a `company_id`.
+
+## Query parameters
+
+<ParamField query="url" type="string" required>
+  Website URL to look up. Accepts any common format — normalised to base domain before matching.
+</ParamField>
+
+<ParamField query="country_iso_code" type="string">
+  Restrict results to a single country: `AT`, `DE`, or `CH`.
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Maximum results to return. Range: 1–50.
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Number of results to skip for pagination.
+</ParamField>
+
+## URL normalisation
+
+| Input | Normalised to |
+|---|---|
+| `https://www.example.com/about?ref=1` | `example.com` |
+| `http://example.com` | `example.com` |
+| `www.example.com` | `example.com` |
+| `example.com` | `example.com` |
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl "https://api.proxdeal.com/v0/lookup/url?url=https://www.siemens.com&country_iso_code=DE" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+```python Python
+import httpx
+
+resp = httpx.get(
+    "https://api.proxdeal.com/v0/lookup/url",
+    params={"url": "https://www.siemens.com", "country_iso_code": "DE"},
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+results = resp.json()["data"]
+```
+```typescript TypeScript
+const params = new URLSearchParams({ url: "https://www.siemens.com", country_iso_code: "DE" });
+const resp = await fetch(
+  `https://api.proxdeal.com/v0/lookup/url?${params}`,
+  { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+);
+const { data } = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+The response structure is identical to [Lookup by Name](/api-reference/lookup/lookup-by-name#response-fields).
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "company_id": "de-4qcggwpkw4dd41qa",
+      "company_legal_name": "Siemens Aktiengesellschaft",
+      "company_legal_form": "AG",
+      "register_number": "HRB 6684",
+      "district_court": "Amtsgericht München",
+      "register_type": "HRB",
+      "company_active": true,
+      "country_iso_code": "DE"
+    }
+  ],
+  "total_count": 1,
+  "limit": 20,
+  "offset": 0,
+  "message": "Found 1 matching company for domain 'siemens.com'",
+  "timestamp": "2026-02-18T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 400 | `INVALID_PARAMETER` | `url` contains null bytes or cannot be parsed as a valid domain |
+| 400 | `INVALID_COUNTRY_CODE` | `country_iso_code` is not `AT`, `DE`, or `CH` |
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

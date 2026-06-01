@@ -1,47 +1,130 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Go from zero to live company data in under 5 minutes."
 ---
-
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
 
 ## Prerequisites
 
-Before you begin, you must have:
+- A ProxDeal account at [app.proxdeal.com](https://app.proxdeal.com)
+- An active API key (create one in **API Settings → API Keys**)
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+## The three-call pattern
 
-## Get started
+Most ProxDeal workflows follow the same pattern: **lookup → resolve → enrich**.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Look up a company by name or URL">
+    Use the Lookup endpoint to resolve a name or website to a `company_id`. This is the entry point for almost every workflow.
 
-    ```bash
-    npm install your-package
+    <CodeGroup>
+    ```bash cURL
+    curl "https://api.proxdeal.com/v0/lookup/company?query=Holzstudio+Sahm&country_iso_code=DE" \
+      -H "Authorization: Bearer YOUR_API_KEY"
     ```
+    ```python Python
+    import httpx
+
+    resp = httpx.get(
+        "https://api.proxdeal.com/v0/lookup/company",
+        params={"query": "Holzstudio Sahm", "country_iso_code": "DE"},
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+    )
+    data = resp.json()
+    company_id = data["data"][0]["company_id"]
+    ```
+    ```typescript TypeScript
+    const resp = await fetch(
+      "https://api.proxdeal.com/v0/lookup/company?query=Holzstudio+Sahm&country_iso_code=DE",
+      { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+    );
+    const data = await resp.json();
+    const companyId = data.data[0].company_id;
+    ```
+    </CodeGroup>
+
+    The response contains a list of matches. Each item includes a `company_id`, legal name, register number, and country.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
 
-    ```bash
-    your-cli init
+  <Step title="Fetch the full company profile">
+    Pass the `company_id` to the Company endpoint to get the full profile: address, industry classification, WZ2025 codes, representatives, website URL, and more.
+
+    <CodeGroup>
+    ```bash cURL
+    curl "https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w" \
+      -H "Authorization: Bearer YOUR_API_KEY"
     ```
+    ```python Python
+    resp = httpx.get(
+        f"https://api.proxdeal.com/v0/company/{company_id}",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+    )
+    company = resp.json()["data"]
+    print(company["company_legal_name"], company["address_city"])
+    ```
+    ```typescript TypeScript
+    const resp = await fetch(
+      `https://api.proxdeal.com/v0/company/${companyId}`,
+      { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+    );
+    const { data } = await resp.json();
+    ```
+    </CodeGroup>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
 
-    ```bash
-    your-cli start
+  <Step title="Enrich with financials">
+    Pull the most recent annual financial report — revenue, profit, equity, employees, and 20+ more fields.
+
+    <CodeGroup>
+    ```bash cURL
+    curl "https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials" \
+      -H "Authorization: Bearer YOUR_API_KEY"
     ```
+    ```python Python
+    resp = httpx.get(
+        f"https://api.proxdeal.com/v0/company/{company_id}/financials",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+    )
+    fin = resp.json()["data"]
+    print(f"Revenue: €{fin['revenue']:,.0f}  Employees: {fin['employees']}")
+    ```
+    ```typescript TypeScript
+    const resp = await fetch(
+      `https://api.proxdeal.com/v0/company/${companyId}/financials`,
+      { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+    );
+    const { data } = await resp.json();
+    ```
+    </CodeGroup>
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## Common use cases
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+| Use case | Endpoints |
+|---|---|
+| CRM enrichment | Lookup → Company → Financials |
+| Ownership / compliance | Lookup → Shareholders (L1 or UBO) |
+| Market screening | DataFinder Search |
+| M&A target discovery | Longlist |
+| Website-to-company resolution | Lookup by URL |
+| Bulk list matching | Identify Batch |
+
+## Response envelope
+
+All successful responses share the same envelope:
+
+```json
+{
+  "status": "success",
+  "data": { ... },
+  "message": "...",
+  "timestamp": "2026-01-15T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+Save the `request_id` — include it in any support request to help us trace the call.
+
+## Need help?
+
+Email us at [info@proxdeal.com](mailto:info@proxdeal.com) or open the live chat in the dashboard.

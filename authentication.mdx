@@ -1,0 +1,70 @@
+---
+title: "Authentication"
+description: "How to authenticate API requests with your ProxDeal API key."
+---
+
+All API endpoints (except `GET /health`) require authentication via a Bearer token in the `Authorization` header.
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Getting an API key
+
+1. Log in to [app.proxdeal.com](https://app.proxdeal.com)
+2. Open **API Settings → API Keys**
+3. Click **Create key**, give it a name, and copy the secret immediately — it is shown only once
+
+## Projects and keys
+
+API keys belong to **projects**. A project groups keys, usage quotas, and billing under one unit.
+
+- Both the **key** and its **parent project** must be active for requests to succeed
+- Deactivating a project instantly blocks all its keys
+- One project can have multiple keys (e.g. one per environment)
+
+## Making an authenticated request
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/v0/lookup/company?query=Siemens \
+  -H "Authorization: Bearer pd_live_xxxxxxxxxxxx"
+```
+```python Python
+import httpx
+
+headers = {"Authorization": "Bearer pd_live_xxxxxxxxxxxx"}
+
+resp = httpx.get(
+    "https://api.proxdeal.com/v0/lookup/company",
+    params={"query": "Siemens"},
+    headers=headers,
+)
+```
+```typescript TypeScript
+const headers = { Authorization: "Bearer pd_live_xxxxxxxxxxxx" };
+
+const resp = await fetch(
+  "https://api.proxdeal.com/v0/lookup/company?query=Siemens",
+  { headers }
+);
+```
+</CodeGroup>
+
+## Authentication errors
+
+| Error code | HTTP status | Cause |
+|---|---|---|
+| `AUTH_INVALID_KEY` | 401 | Key does not exist, is inactive, or its project is inactive |
+| `AUTH_MISSING_CREDENTIALS` | 403 | No `Authorization` header was sent |
+| `IP_THROTTLED` | 429 | Too many failed auth attempts from this IP address within one minute |
+
+<Warning>
+  If an IP address sends more than 20 failed authentication requests within one minute, all further requests from that IP are temporarily blocked with `429 IP_THROTTLED`. This protects against brute-force key guessing.
+</Warning>
+
+## Key security
+
+- Store API keys in environment variables, never in source code
+- Use separate keys for development and production
+- Rotate keys immediately if you suspect a compromise — deactivate the old key and issue a new one from the dashboard

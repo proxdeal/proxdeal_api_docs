@@ -1,0 +1,156 @@
+---
+title: "Get Financials"
+description: "Retrieve the most recent annual financial report for a company."
+---
+
+<Note>**Pricing:** €0.10 per successful call</Note>
+
+```
+GET https://api.proxdeal.com/v0/company/{company_id}/financials
+```
+
+Returns the single most recent financial report for a company, sourced from official filings — the German Unternehmensregister (Bundesanzeiger) and the Austrian Firmenbuch. Covers 25+ financial metrics including revenue, profit, equity, debt, and employee count.
+
+For the full time-series of all available reports, use [Get Historic Financials](/api-reference/company/get-financials-historic).
+
+## Path parameters
+
+<ParamField path="company_id" type="string" required>
+  The unique ProxDeal company identifier. Obtain one from the [Lookup](/api-reference/lookup/lookup-by-name) endpoint.
+</ParamField>
+
+## Example
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+```python Python
+import httpx
+
+resp = httpx.get(
+    "https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+fin = resp.json()["data"]
+print(f"Revenue: €{fin['revenue']:,.0f}  Employees: {fin['employees']}")
+```
+```typescript TypeScript
+const resp = await fetch(
+  "https://api.proxdeal.com/v0/company/de-0001z7cs0ej81r1w/financials",
+  { headers: { Authorization: "Bearer YOUR_API_KEY" } }
+);
+const { data } = await resp.json();
+```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "company_id": "de-0001z7cs0ej81r1w",
+    "finreport_doc_title": "Jahresabschluss zum Geschäftsjahr vom 01.01.2023 bis zum 31.12.2023",
+    "finreport_doc_type": "Jahresabschluss",
+    "finreport_doc_source": "Unternehmensregister",
+    "finreport_year": 2023,
+    "finreport_date_publish": "2024-06-15",
+    "finreport_date_start": "2023-01-01",
+    "finreport_date_end": "2023-12-31",
+    "is_group_report": false,
+    "is_liquid_report": false,
+    "revenue": 12500000.0,
+    "profit": 1800000.0,
+    "net_income": 1500000.0,
+    "total_assets": 8500000.0,
+    "equity": 3400000.0,
+    "debt": 5100000.0,
+    "liabilities": 5100000.0,
+    "cash_balance": 950000.0,
+    "current_assets": 4200000.0,
+    "fixed_assets": 4300000.0,
+    "receivables": 2100000.0,
+    "provisions": 800000.0,
+    "equity_ratio": 0.4,
+    "debt_ratio": 0.6,
+    "debt_equity_ratio": 1.5,
+    "interest_payments": 120000.0,
+    "interest_income": 15000.0,
+    "tax_payments": 450000.0,
+    "tax_refund": null,
+    "staff_payments": 3200000.0,
+    "amortization": 600000.0,
+    "material_payments": 4500000.0,
+    "employees": 45
+  },
+  "message": "Financial data retrieved successfully",
+  "timestamp": "2026-01-15T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+## Response fields
+
+<ResponseField name="data" type="object">
+  <Expandable title="Financials data">
+    **Report metadata**
+
+    <ResponseField name="company_id" type="string">ProxDeal company identifier.</ResponseField>
+    <ResponseField name="finreport_doc_title" type="string | null">Title of the financial report document.</ResponseField>
+    <ResponseField name="finreport_doc_type" type="string | null">Report type (e.g. `Jahresabschluss`, `Konzernabschluss`).</ResponseField>
+    <ResponseField name="finreport_doc_id" type="string | null">Unique document identifier in the source register.</ResponseField>
+    <ResponseField name="finreport_doc_source" type="string | null">Source register (e.g. `Unternehmensregister`, `Firmenbuch`).</ResponseField>
+    <ResponseField name="finreport_year" type="integer | null">Fiscal year.</ResponseField>
+    <ResponseField name="finreport_date_publish" type="string | null">Date the report was published (ISO 8601).</ResponseField>
+    <ResponseField name="finreport_date_start" type="string | null">Start of the reporting period.</ResponseField>
+    <ResponseField name="finreport_date_end" type="string | null">End of the reporting period.</ResponseField>
+    <ResponseField name="is_group_report" type="boolean | null">Whether this is a consolidated group report (Konzernabschluss).</ResponseField>
+    <ResponseField name="is_liquid_report" type="boolean | null">Whether this is a liquidation report.</ResponseField>
+
+    **Key metrics (all values in EUR)**
+
+    <ResponseField name="revenue" type="number | null">Revenue (Umsatzerlöse).</ResponseField>
+    <ResponseField name="profit" type="number | null">Balance sheet profit or loss (Bilanzgewinn / Bilanzverlust).</ResponseField>
+    <ResponseField name="net_income" type="number | null">Net income (Jahresüberschuss / Jahresfehlbetrag).</ResponseField>
+    <ResponseField name="total_assets" type="number | null">Total assets (Bilanzsumme).</ResponseField>
+    <ResponseField name="equity" type="number | null">Equity (Eigenkapital).</ResponseField>
+    <ResponseField name="debt" type="number | null">Debt / liabilities (Verbindlichkeiten).</ResponseField>
+    <ResponseField name="liabilities" type="number | null">Total liabilities.</ResponseField>
+    <ResponseField name="cash_balance" type="number | null">Cash and cash equivalents.</ResponseField>
+    <ResponseField name="current_assets" type="number | null">Current assets (Umlaufvermögen).</ResponseField>
+    <ResponseField name="fixed_assets" type="number | null">Fixed assets (Anlagevermögen).</ResponseField>
+    <ResponseField name="receivables" type="number | null">Receivables (Forderungen).</ResponseField>
+    <ResponseField name="provisions" type="number | null">Provisions (Rückstellungen).</ResponseField>
+
+    **Ratios**
+
+    <ResponseField name="equity_ratio" type="number | null">Equity ratio — `equity / total_assets` (0.0–1.0).</ResponseField>
+    <ResponseField name="debt_ratio" type="number | null">Debt ratio — `debt / total_assets` (0.0–1.0).</ResponseField>
+    <ResponseField name="debt_equity_ratio" type="number | null">Debt-to-equity ratio (Verschuldungsgrad).</ResponseField>
+
+    **Cost items**
+
+    <ResponseField name="interest_payments" type="number | null">Interest payments (Zinsaufwendungen).</ResponseField>
+    <ResponseField name="interest_income" type="number | null">Interest income (Zinserträge).</ResponseField>
+    <ResponseField name="tax_payments" type="number | null">Tax payments.</ResponseField>
+    <ResponseField name="tax_refund" type="number | null">Tax refunds.</ResponseField>
+    <ResponseField name="staff_payments" type="number | null">Staff costs (Personalaufwand).</ResponseField>
+    <ResponseField name="amortization" type="number | null">Depreciation and amortization (Abschreibungen).</ResponseField>
+    <ResponseField name="material_payments" type="number | null">Material costs (Materialaufwand).</ResponseField>
+
+    **Other**
+
+    <ResponseField name="employees" type="integer | null">Employee count.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+| Status | Code | Cause |
+|---|---|---|
+| 401 | `AUTH_INVALID_KEY` | Invalid or missing API key |
+| 404 | `FINANCIALS_NOT_FOUND` | No financial data exists for this company ID |
+| 400 | `INVALID_COMPANY_ID` | The ID contains invalid characters |
+| 429 | `RATE_LIMIT_EXCEEDED` | Rate limit hit |

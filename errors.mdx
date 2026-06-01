@@ -1,0 +1,65 @@
+---
+title: "Error Reference"
+description: "All error codes, their HTTP status, and what causes them."
+---
+
+All errors follow a consistent JSON structure:
+
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "ERROR_CODE",
+    "details": "Human-readable explanation of the specific problem"
+  },
+  "message": "Short summary",
+  "timestamp": "2026-01-15T10:30:00Z",
+  "request_id": "req_abc123def456"
+}
+```
+
+Include the `request_id` when contacting support — it lets us trace the exact request.
+
+## HTTP status codes
+
+| Status | Meaning |
+|---|---|
+| `200` | Success |
+| `400` | Bad request — invalid input, conflicting parameters, or missing required fields |
+| `401` | Authentication failed — invalid or missing API key |
+| `402` | Insufficient credits |
+| `403` | Missing credentials — no `Authorization` header |
+| `404` | Resource not found |
+| `405` | Method not allowed — wrong HTTP method for this endpoint |
+| `422` | Unprocessable entity — validation error or a dependent operation failed (e.g. geocoding) |
+| `429` | Rate limit exceeded |
+| `500` | Internal server error |
+| `502` | Upstream service error |
+| `503` | Service unavailable |
+| `504` | Upstream service timeout |
+
+## Error codes
+
+| Error code | HTTP | Description |
+|---|---|---|
+| `COMPANY_NOT_FOUND` | 404 | No company exists with the given `company_id` |
+| `FINANCIALS_NOT_FOUND` | 404 | No financial data exists for the given `company_id` |
+| `SHAREHOLDERS_NOT_FOUND` | 404 | No shareholder data exists for the given `company_id` |
+| `DIMENSIONS_NOT_FOUND` | 404 | No dimension data exists for the given URL — use `POST /v0/website/analyze` to trigger classification |
+| `INVALID_COMPANY_ID` | 400 | The `company_id` contains invalid characters (e.g. null bytes) |
+| `INVALID_URL` | 400 / 422 | No valid domain could be extracted from the provided URL |
+| `INVALID_PARAMETER` | 400 | A parameter is missing, empty after normalisation, or contains invalid characters |
+| `INVALID_COUNTRY_CODE` | 400 | `country_iso_code` is not one of `AT`, `DE`, `CH` |
+| `INVALID_MODE` | 422 | `mode` must be `buyside` or `sellside` (Longlist endpoint) |
+| `COMPANY_NAME_REQUIRED` | 422 | `company_name` is required when `mode=sellside` (Longlist endpoint) |
+| `NO_FILTERS` | 400 | At least one search filter must be provided (DataFinder endpoint) |
+| `LOC_INPUT_CONFLICT` | 400 | `loc_input` and explicit `loc_lat`/`loc_lng` cannot be used together |
+| `LOC_INPUT_MISSING_RADIUS` | 400 | `loc_input` requires `loc_radius` to be set |
+| `GEOCODE_FAILED` | 422 | The `loc_input` string could not be resolved to geographic coordinates |
+| `SCRAPE_FAILED` | 422 | The website scraper encountered an unrecoverable error (timeout, TLS failure, etc.) |
+| `SCRAPE_INSUFFICIENT` | 422 | The website was reached but did not yield enough structured content — often caused by bot protection or login-gated pages |
+| `AUTH_INVALID_KEY` | 401 | API key is invalid, inactive, or its parent project is inactive |
+| `AUTH_MISSING_CREDENTIALS` | 403 | No `Authorization` header was provided |
+| `RATE_LIMIT_EXCEEDED` | 429 | Key or project rate limit exceeded — check the `Retry-After` header |
+| `IP_THROTTLED` | 429 | Too many failed auth attempts from this IP address within one minute |
+| `INTERNAL_ERROR` | 500 | An unexpected server error — contact support with the `request_id` |
