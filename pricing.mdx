@@ -1,0 +1,82 @@
+---
+title: "Pricing"
+description: "Credit costs for every ProxDeal API endpoint."
+---
+
+Credits are deducted only on **successful** responses (HTTP 2xx). Failed calls — auth errors, validation errors, 5xx — are never charged.
+
+The live rates below are fetched directly from the API and are always up to date.
+
+```
+GET https://api.proxdeal.com/v0/pricing
+```
+
+No authentication required.
+
+## Current rates
+
+| Endpoint | Key | EUR / call |
+|---|---|---|
+| `GET /v0/company/{id}` | `get_company` | €0.10 |
+| `GET /v0/company/{id}/financials` | `get_financials` | €0.10 |
+| `GET /v0/company/{id}/financials/historic` | `get_financials_historic` | €0.15 |
+| `GET /v0/lookup/company` | `lookup_company` | €0.01 |
+| `GET /v0/lookup/url` | `lookup_url` | €0.01 |
+| `GET /v0/search/companies` | `search_companies` | €0.10 |
+| `POST /v0/website/analyze` | `analyze_website` | €0.20 |
+| `GET /v0/website/dimensions` | `get_dimensions` | €0.20 |
+| `GET /v0/shareholders/{id}/direct` | `get_shareholders_l1` | €0.10 |
+| `GET /v0/shareholders/{id}/ubo` | `get_shareholders_ubo` | €0.25 |
+| `GET /v0/shareholders/{id}/tree` | `get_shareholders_tree` | €0.25 |
+| `POST /v0/identify/company` | `identify_company` | €0.02 |
+| `POST /v0/identify/batch` | `identify_batch` | €2.00 |
+| `POST /v0/longlist/generate` | `generate_longlist` | €5.00 |
+| `GET /health` | — | Free |
+
+## Fetching rates programmatically
+
+<CodeGroup>
+```bash cURL
+curl https://api.proxdeal.com/v0/pricing
+```
+```python Python
+import httpx
+
+resp = httpx.get("https://api.proxdeal.com/v0/pricing")
+rates = resp.json()["data"]
+# rates["get_company"] → {"eur_cents": 10, "eur": 0.10}
+```
+```typescript TypeScript
+const resp = await fetch("https://api.proxdeal.com/v0/pricing");
+const { data } = await resp.json();
+// data.get_company → { eur_cents: 10, eur: 0.10 }
+```
+</CodeGroup>
+
+## Response shape
+
+```json
+{
+  "status": "success",
+  "data": {
+    "get_company":             { "eur_cents": 10,  "eur": 0.10 },
+    "get_financials":          { "eur_cents": 10,  "eur": 0.10 },
+    "get_financials_historic": { "eur_cents": 15,  "eur": 0.15 },
+    "lookup_company":          { "eur_cents": 1,   "eur": 0.01 },
+    "lookup_url":              { "eur_cents": 1,   "eur": 0.01 },
+    "search_companies":        { "eur_cents": 10,  "eur": 0.10 },
+    "analyze_website":         { "eur_cents": 20,  "eur": 0.20 },
+    "get_dimensions":          { "eur_cents": 20,  "eur": 0.20 },
+    "get_shareholders_l1":     { "eur_cents": 10,  "eur": 0.10 },
+    "get_shareholders_ubo":    { "eur_cents": 25,  "eur": 0.25 },
+    "get_shareholders_tree":   { "eur_cents": 25,  "eur": 0.25 },
+    "identify_company":        { "eur_cents": 2,   "eur": 0.02 },
+    "identify_batch":          { "eur_cents": 200, "eur": 2.00 },
+    "generate_longlist":       { "eur_cents": 500, "eur": 5.00 }
+  }
+}
+```
+
+## Credit management
+
+Buy credits and monitor usage in the [Dashboard](https://app.proxdeal.com). Credits never expire.
