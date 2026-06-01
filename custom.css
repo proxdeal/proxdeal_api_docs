@@ -38,6 +38,23 @@ header a span[class*="rounded"] {
   border-radius: 0.2rem !important;
 }
 
+/* Active sidebar item gets a 2px full-height left bar, like the app.
+   currentColor matches the active text (primary / primary-light per mode). */
+.sidebar-group a[aria-current="page"] {
+  position: relative;
+}
+
+.sidebar-group a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: currentColor;
+  border-radius: 0;
+}
+
 /* Align the navbar right controls (Dashboard + theme toggle) with the left
    edge of the "On this page" rail, which only appears at xl (>=1280px).
    The rail is a fixed 304px column + 32px gutter inside the centered
