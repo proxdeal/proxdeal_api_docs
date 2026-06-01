@@ -15,3 +15,9 @@
 .card-group {
   row-gap: 1rem !important;
 }
+
+/* Match the inter-group gap to the intra-group row-gap so a standalone
+   single-card group (e.g. API Overview) sits flush with the rows above it. */
+.card-group + .card-group {
+  margin-top: 1rem !important;
+}
