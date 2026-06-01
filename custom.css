@@ -1,13 +1,11 @@
-/* Mintlify uses bare element selectors (no dot/hash) for built-in components */
-card {
+/* Cards render as <div class="card ... rounded-2xl ...">. Use the class selector. */
+.card {
   border-radius: 0 !important;
-}
-
-card * {
-  border-radius: 0 !important;
-}
-
-card {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
+}
+
+.card img,
+.card [class*="rounded"] {
+  border-radius: 0 !important;
 }
