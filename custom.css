@@ -1,0 +1,14 @@
+/* Remove rounded corners from Card components */
+a[class*="CardGroup"] > *,
+div[class*="card"],
+.group\/card,
+[data-component="card"],
+.card-container {
+  border-radius: 0 !important;
+}
+
+/* Target Mintlify card wrapper divs */
+.CardGroup a > div,
+a[href] > div[class*="border"] {
+  border-radius: 0 !important;
+}
