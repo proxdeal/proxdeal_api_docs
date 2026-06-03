@@ -39,7 +39,7 @@
       },
       {
         "tab": "API Overview",
-        "openapi": "/openapi.json",
+        "openapi": "https://api.proxdeal.com/openapi.public.json",
         "pages": [
           "api-reference/overview",
           {
